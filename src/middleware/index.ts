@@ -32,12 +32,12 @@ export const verifyToken = async (
   next: NextFunction,
 ) => {
   try {
-    const token = req.headers.cookie.split('=')[1];
+    let token;
+    if (req.headers?.cookie) {
+      token = req.headers?.cookie.split('=')[1];
+    }
     if (!token) {
-      return res.status(409).json({
-        statusCode: 409,
-        message: 'token is required',
-      });
+      return res.render('index', { err: 'you are not logged in' });
     }
     return await jwt.verify(
       token,
@@ -53,7 +53,6 @@ export const verifyToken = async (
       },
     );
   } catch (err: any) {
-    console.log(err);
-    return next(new ApiError(400, err.message));
+    return res.render('index', { err: err.message });
   }
 };

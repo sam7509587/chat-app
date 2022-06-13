@@ -2,6 +2,7 @@
 import { v4 as UUID } from 'uuid';
 import * as Sequelize from 'sequelize';
 import { ApiError } from '../config';
+import { getFriends } from '../services';
 
 const { conversation, user } = require('../db/models');
 
@@ -109,5 +110,13 @@ export const acceptRequest = async (
     });
   } catch (err: any) {
     return next(new ApiError(400, err.message));
+  }
+};
+export const seeFriend = async (req:any, res:any) => {
+  try {
+    const friends = await getFriends(req.user);
+    return res.json({ data: friends });
+  } catch (err) {
+    return console.log(err);
   }
 };

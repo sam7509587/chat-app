@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-param-reassign */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable array-callback-return */
@@ -8,6 +10,16 @@ import * as Sequelize from 'sequelize';
 const { conversation, user, message } = require('../db/models');
 
 const { Op } = Sequelize;
+async function lastMessage(ids:any) {
+  const lastMsg = await message.findOne({
+    where: {
+      to: { [Op.or]: ids },
+      from: { [Op.or]: ids },
+    },
+    order: [['createdAt', 'DESC']],
+  });
+  return lastMsg[0];
+}
 function formatDate(date:any) {
   let setDate = '';
   const hour = date.getHours();
@@ -45,8 +57,16 @@ export const getFriends = async (userData: { id: any; }) => {
     },
     attributes: ['fullName', 'id', 'email'],
   });
+  const newData = data.map((user: { id: any, lastMsg:any }) => {
+    const ids = [id, user.id];
+    const last = lastMessage(ids);
+    user.lastMsg = last;
+    return user;
+  });
+  console.log(newData);
   return data;
 };
+
 export const MsgById = async (userData: { id: any; }, otherId: any) => {
   const { id } = userData;
   const ids: any = [id, otherId];
@@ -78,14 +98,15 @@ export const MsgById = async (userData: { id: any; }, otherId: any) => {
     ],
   });
   const findUnreadMsg = data
-    .filter((element: { isRead: boolean; to: any; }) => element.isRead === false && element.to === id)
+    .filter((element: { isRead: boolean; to: any; from:any}) => element.isRead === false && element.to === id && element.from === otherId)
     .map((ids: { id: any; }) => ids.id);
   const otherUser = await user.findOne({ where: { id: otherId } });
   const MsgWithTime = data.map((element:any) => {
     element.msgSentOn = formatDate(element.createdAt);
     return element;
   });
-  await message.update({ isRead: true }, { where: { id: findUnreadMsg } });
+  console.log(findUnreadMsg);
+  await message.update({ isRead: true }, { where: findUnreadMsg });
   return { msg: MsgWithTime, otherUser };
 };
 

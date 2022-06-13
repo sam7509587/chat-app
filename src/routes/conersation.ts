@@ -1,12 +1,13 @@
 /* eslint-disable import/no-unresolved */
 import express from 'express';
 import {
-  acceptRequest, rejectRequest, seeRequests, sendRequest,
+  acceptRequest, rejectRequest, seeFriend, seeRequests, sendRequest,
 } from '../controller';
 import { verifyToken } from '../middleware';
 import { validateId } from '../validation';
 
 const router = express.Router();
+router.get('/friendList', verifyToken, seeFriend);
 router.route('/:id').get(validateId, verifyToken, sendRequest);
 
 router.get('/accept/:id', validateId, verifyToken, acceptRequest);

@@ -37,6 +37,8 @@ module.exports = (sequelize: any, DataTypes: { STRING: any; INTEGER: any; BOOLEA
     email: DataTypes.STRING,
     isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
     isVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
+    otp: { type: DataTypes.INTEGER },
+    otpExp: { type: DataTypes.DATE },
   }, {
     sequelize,
     modelName: 'user',

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/index.css">
+    <title>Verify Email</title>
+</head>
+
+<body>
+    <div class="container">
+        <main class="signup-container">
+            <h1 class="heading-primary">Step 2/3<span class="span-blue">.</span></h1>
+            <p class="text-mute">Enter your Otp to verify your account.</p>
+            <form class="signup-form" action="/user/verify" method="post">
+                <%if (err) { %>
+                    <h5><%= err %></h5>
+                    <% } %>
+                <label class="inp">
+                    <input type="email" class="input-text" name="email" placeholder="&nbsp;" value="<%- email %>" >
+                    <span class="label">Email</span>
+                    <span class="input-icon"><i class="fa-solid fa-envelope"></i></span>
+                </label>
+                <label class="inp">
+                    <input type="otp" class="input-text" name="otp" placeholder="&nbsp;" id="password">
+                    <span class="label">OTP</span>
+                    <span class="input-icon input-icon-password" data-password><i class="fa-solid fa-eye"></i></span>
+                </label>
+
+                <button class="btn btn-login" type="submit">Verify Otp</button>
+            </form>
+        </main>
+    </div>
+</body>
+
+</html>

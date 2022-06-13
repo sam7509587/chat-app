@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 /* eslint-disable import/no-unresolved */
 import bcrypt from 'bcrypt';
 import { v4 as UUID } from 'uuid';
@@ -5,13 +6,17 @@ import jwt from 'jsonwebtoken';
 import * as Sequelize from 'sequelize';
 import { ApiError, SECRET_KEY } from '../config';
 import { getFriends, notFriends } from '../services';
+import { sendOtpMail } from '../services/mail';
 
 const { user, conversation } = require('../db/models');
 
 export const indexPage = async (req:any, res:any) => {
-  const token = req.headers.cookie.split('=')[1];
+  let token;
+  if (req.headers.cookie) {
+    token = req.headers.cookie.split('=')[1];
+  }
   if (!token) {
-    return res.render('login');
+    return res.render('index', { err: 'you are not logged in' });
   }
   const verifyToken:any = await jwt.verify(
     token,
@@ -28,35 +33,52 @@ export const indexPage = async (req:any, res:any) => {
   });
 };
 export const login = async (req: any, res: any) => {
-  const { email, password, fullName } = req.body;
+  const { email, password }:{email:string, password:string} = req.body;
   try {
     const userFound = await user.findOne({ where: { email } });
     if (!userFound) {
-      if (fullName.length === 0) {
-        return res.render('index', { err: 'full name is required' });
-      }
+      const otp = Math.floor(100000 + Math.random() * 900000);
+      const otpExp = new Date(new Date().getTime() + 5 * 60000);
       const bcryptPass = await bcrypt.hash(password, 10);
-      const userCreated = await user.create({
+      await user.create({
         id: UUID(),
+        otp,
         email,
+        otpExp,
         password: bcryptPass,
-        fullName,
       });
-      const token = await jwt.sign({ id: userCreated.id }, SECRET_KEY);
-      const data = await getFriends(userCreated);
-      const msg :any = [];
-      const otherUser:any = {};
-      otherUser.id = 'none';
-      const allotherUsers = await notFriends(userCreated);
-      return res.cookie('access_token', token, {
-        httpOnly: true,
-      }).render('dashboard', {
-        data, msg, otherUser, allotherUsers, user: userCreated,
+      sendOtpMail(email, otp);
+      return res.render('otp', {
+        err: '', email,
       });
     }
     const matchPass = await bcrypt.compare(password, userFound.password);
     if (!matchPass) {
       return res.render('index', { err: 'email or password is wrong' });
+    }
+    if (userFound.isVerfied === false) {
+      const otp = Math.floor(100000 + Math.random() * 900000);
+      if (userFound.otpExp < Date.now()) {
+        sendOtpMail(email, otp);
+        const otpExp = new Date(new Date().getTime() + 5 * 60000);
+        await user.update({ otp, otpExp }, { where: { email } });
+        return res.render('otp', {
+          otp,
+          email,
+          err: `please verify otp first sent to ${email}`,
+        });
+      }
+      return res.render('otp', {
+        otp,
+        email,
+        err: 'please verify otp first that we have sent ',
+      });
+    }
+    if (!userFound.fullName) {
+      return res.render('profile', {
+        email,
+        err: 'Please enter full Name for logging in ',
+      });
     }
     const token = await jwt.sign({ id: userFound.id }, SECRET_KEY);
     const data = await getFriends(userFound);
@@ -117,3 +139,68 @@ export const allUser = async (req: any, res: any, next: any) => {
     return next(new ApiError(400, e.message));
   }
 };
+export const verfiyOtp = async (req:any, res:any) => {
+  try {
+    const { email, otp }: any = req.body;
+    if (!email || !otp) {
+      return res.render('otp', { otp: '', email, err: 'email and otp are required' });
+    }
+    const foundData = await user.findOne({ where: { email } });
+    if (!foundData) {
+      return res.render('otp', {
+        otp,
+        email,
+        err: 'no user found with this email',
+      });
+    }
+    if (foundData.isVerified === true) {
+      return res.render('otp', { otp, email, err: 'already verified user' });
+    }
+    // eslint-disable-next-line radix
+    if (foundData.otp !== parseInt(otp)) {
+      return res.render('otp', { otp, email, err: 'invalid otp' });
+    }
+    if (foundData.otpExp < Date.now()) {
+      const newOtp = Math.floor(100000 + Math.random() * 900000);
+
+      sendOtpMail(email, newOtp);
+      const otpExp = new Date(new Date().getTime() + 5 * 60000);
+      await user.update({ otp: newOtp, otpExp }, { where: { email } });
+      return res.render('otp', {
+        otp,
+        email,
+        err: 'otp expired enter details in login to get info',
+      });
+    }
+    await user.update({ isVerified: true }, { where: { email } });
+    return res.render('profile', { email, err: '' });
+  } catch (err:any) {
+    return res.render('otp', {
+      err: err.message,
+    });
+  }
+};
+export const addFullName = async (req:any, res:any) => {
+  const { fullName, email } = req.body;
+  if (!fullName) {
+    return res.render('profile', { email, err: 'Full Name is required' });
+  }
+  await user.update({ fullName }, { where: { email } });
+  const userFound = await user.findOne({ where: { email } });
+  if (!userFound) {
+    return res.render('profile', { email, err: 'user not found ' });
+  }
+  const token = await jwt.sign({ id: userFound.id }, SECRET_KEY);
+  const data = await getFriends(userFound);
+  const msg :any = [];
+  const otherUser:any = {};
+  otherUser.id = 'none';
+  const allotherUsers = await notFriends(userFound);
+  return res.cookie('access_token', token, {
+    httpOnly: true,
+  }).render('dashboard', {
+    data, msg, otherUser, allotherUsers, user: userFound,
+  });
+};
+
+export const logout = async (_:any, res:any) => res.clearCookie('access_token').render('index', { err: '' });
