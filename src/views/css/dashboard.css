@@ -1876,3 +1876,9 @@ ul:after {
 .a_tag :hover{
   background-color:#333;
 }
+.unread-msg{
+  top: auto;
+  right: 12px;
+  height: auto;
+  width: auto;
+}

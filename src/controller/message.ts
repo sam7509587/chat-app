@@ -3,7 +3,7 @@
 import * as Sequelize from 'sequelize';
 import { v4 as UUID } from 'uuid';
 import { ApiError } from '../config';
-import { getFriends, MsgById } from '../services';
+import { formatDate, getFriends, MsgById } from '../services';
 
 const { conversation, message } = require('../db/models');
 
@@ -34,7 +34,9 @@ export const sendMessage = async (
       message: messageToSend,
       conversationId: requestFound.id,
     });
-    io.emit('chat message', { receiverId: id, senderId: currUser.id, message: messageToSend });
+    data.dataValues.msgSentOn = formatDate(data.createdAt);
+    io.emit('chat message', { receiverId: id, senderId: currUser.id, message: data.dataValues });
+    io.emit('sent message', { receiverId: id, senderId: currUser.id, message: data.dataValues })
     const users = await getFriends(currUser);
     const messagesData = await MsgById(currUser, id);
     const { msg, otherUser } = messagesData;

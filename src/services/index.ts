@@ -10,17 +10,7 @@ import * as Sequelize from 'sequelize';
 const { conversation, user, message } = require('../db/models');
 
 const { Op } = Sequelize;
-async function lastMessage(ids:any) {
-  const lastMsg = await message.findOne({
-    where: {
-      to: { [Op.or]: ids },
-      from: { [Op.or]: ids },
-    },
-    order: [['createdAt', 'DESC']],
-  });
-  return lastMsg[0];
-}
-function formatDate(date:any) {
+export const formatDate = (date:any)=> {
   let setDate = '';
   const hour = date.getHours();
   let minute = date.getMinutes();
@@ -57,19 +47,32 @@ export const getFriends = async (userData: { id: any; }) => {
     },
     attributes: ['fullName', 'id', 'email'],
   });
-  const newData = data.map((user: { id: any, lastMsg:any }) => {
-    const ids = [id, user.id];
-    const last = lastMessage(ids);
-    user.lastMsg = last;
-    return user;
-  });
-  console.log(newData);
+  //////last message
+
+  for (let i = 0; i < data.length; i++) {
+    let ids =[id,data[i].id]
+    await message.findAll({
+      limit: 1,
+      where: {
+        to: { [Op.or]: ids },
+        from: { [Op.or]: ids },
+      },order: [ [ 'createdAt', 'DESC' ]]}).then((result: any)=>{
+        if(result[0]?.dataValues){
+        data[i].dataValues.message = result[0]?.dataValues;
+        data[i].dataValues.message.msgSentOn  = formatDate(result[0].dataValues.createdAt)}
+      });
+      await message.count({where:{to: id, from:data[i].id ,isRead:false}}).then((result: any)=>{
+        data[i].dataValues.unReadCount = result
+      });
+    }
   return data;
 };
-
+////
 export const MsgById = async (userData: { id: any; }, otherId: any) => {
   const { id } = userData;
   const ids: any = [id, otherId];
+   await message.update({ isRead: true }, { where:{ from:otherId ,to:id ,isRead: false }});
+
   const data = await message.findAll({
     where: {
       to: { [Op.or]: ids },
@@ -97,6 +100,7 @@ export const MsgById = async (userData: { id: any; }, otherId: any) => {
       },
     ],
   });
+  
   const findUnreadMsg = data
     .filter((element: { isRead: boolean; to: any; from:any}) => element.isRead === false && element.to === id && element.from === otherId)
     .map((ids: { id: any; }) => ids.id);
@@ -105,8 +109,6 @@ export const MsgById = async (userData: { id: any; }, otherId: any) => {
     element.msgSentOn = formatDate(element.createdAt);
     return element;
   });
-  console.log(findUnreadMsg);
-  await message.update({ isRead: true }, { where: findUnreadMsg });
   return { msg: MsgWithTime, otherUser };
 };
 

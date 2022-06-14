@@ -21,6 +21,7 @@ const label1 = document.getElementById('label1');
 socket.on('chat message', (data) => {
   const { message, receiverId, senderId } = data;
   if (receiverIdOnPage === senderId && senderIdOnPage === receiverId) {
+    socket.emit('undateMsgRead',{message});
     const appendHtml = `<div class ="vW7d1"><span></span>
 <div class="_3_7SH _3DFk6 message-in tail"><span class="tail-container"></span><span
     class="tail-container highlight"></span>
@@ -28,16 +29,22 @@ socket.on('chat message', (data) => {
     <div class="copyable-text" data-pre-plain-text="">
       <div class="_3zb-j ZhF0n"><span dir="ltr"
           class="selectable-text invisible-space copyable-text">
-        ${message}
+        ${message.message}
         </span></div>
     </div>
     <div class="_2f-RV">
-      <div class="_1DZAH"><span class="_1ORuP"></span><span class="_3EFt_">5:37 PM</span>
-      </div>
-    </div>
-  </div><span></span>
-</div>
-</div>`;
+    <div class="_1DZAH" role="button"><span class="_1ORuP"></span>
+    <span class="_3EFt_">${message.msgSentOn}</span>
+     <div class="_32uRw">
+      <span data-icon="msg-dblcheck-ack" class="">
+       <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15"
+        width="16" height="15">
+        <path fill="#4FC3F7" class = 'read'
+        d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z">
+        </path>
+        </svg>
+        </span>
+         </div>`;
     mainDiv.innerHTML += appendHtml;
 
     chatDiv.append(mainDiv);
@@ -224,7 +231,6 @@ function rejectRequest(data) {
   fetch(`http://127.0.0.1:8080/friend/reject/${data.id}`)
     .then((data) => data.json())
     .then((datafound) => {
-      console.log(datafound);
     });
 }
 /// ///////////////colour img ////////////////////
@@ -288,7 +294,6 @@ function getFriends(btndata) {
       const crossBtn = '<button class="close" onclick = "getFriends()"></button>';
       label1.innerHTML = '';
       let htmlForUsers = '';
-      console.log(datafound.data);
       datafound.data.forEach((element) => {
         htmlForUsers += `<div tabindex="-1">
                     <div class="_2EXPL">
@@ -334,3 +339,24 @@ function getFriends(btndata) {
       // input.innerHTML = closeButton
     });
 }
+let number = 0;
+socket.on('sent message',(data)=>{
+  const { message,receiverId, senderId } = data;
+  if(senderIdOnPage === receiverId){
+    const friend = document.getElementById(`${senderId}_friend_list`)
+    if(receiverIdOnPage === senderId){
+      friend.innerHTML =`${message.message}<svg id="Layer_1"
+      xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="18" height="18">
+      <path fill="#4FC3F7"
+        d="M17.394 5.035l-.57-.444a.434.434 0 0 0-.609.076l-6.39 8.198a.38.38 0 0 1-.577.039l-.427-.388a.381.381 0 0 0-.578.038l-.451.576a.497.497 0 0 0 .043.645l1.575 1.51a.38.38 0 0 0 .577-.039l7.483-9.602a.436.436 0 0 0-.076-.609zm-4.892 0l-.57-.444a.434.434 0 0 0-.609.076l-6.39 8.198a.38.38 0 0 1-.577.039l-2.614-2.556a.435.435 0 0 0-.614.007l-.505.516a.435.435 0 0 0 .007.614l3.887 3.8a.38.38 0 0 0 .577-.039l7.483-9.602a.435.435 0 0 0-.075-.609z">
+      </path>
+    </svg></span></div>`
+    } else{
+      if(friend.getElementsByClassName('icon-button__badge')[0]){
+        let newNumber = friend.getElementsByClassName('icon-button__badge')[0].textContent
+        number +=(1+newNumber)
+      }
+      number += 1
+   friend.innerHTML =`${ message.message}<span class="icon-button__badge unread-msg" >${number}</span>`
+  }}
+})
