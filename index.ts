@@ -19,3 +19,6 @@ db.sequelize
       console.log('db connected');
     });
   });
+require('./src/socket')(io);
+
+export default io;

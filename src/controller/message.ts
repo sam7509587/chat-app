@@ -8,11 +8,7 @@ import { formatDate, getFriends, MsgById } from '../services';
 const { conversation, message } = require('../db/models');
 
 const { Op } = Sequelize;
-export const sendMessage = async (
-  req: any,
-  res: any,
-  next: any,
-) => {
+export const sendMessage = async (req: any, res: any, next: any) => {
   const { id } = req.params;
   let { message: messageToSend } = req.body;
   messageToSend = messageToSend.trim();
@@ -35,24 +31,31 @@ export const sendMessage = async (
       conversationId: requestFound.id,
     });
     data.dataValues.msgSentOn = formatDate(data.createdAt);
-    io.emit('chat message', { receiverId: id, senderId: currUser.id, message: data.dataValues });
-    io.emit('sent message', { receiverId: id, senderId: currUser.id, message: data.dataValues })
+    io.emit('chat message', {
+      receiverId: id,
+      senderId: currUser.id,
+      message: data.dataValues,
+    });
+    io.emit('sent message', {
+      receiverId: id,
+      senderId: currUser.id,
+      message: data.dataValues,
+    });
     const users = await getFriends(currUser);
     const messagesData = await MsgById(currUser, id);
     const { msg, otherUser } = messagesData;
     return res.render('dashboard', {
-      msg, data: users, user: currUser, otherUser,
+      msg,
+      data: users,
+      user: currUser,
+      otherUser,
     });
   } catch (err: any) {
     return next(new ApiError(400, err.message));
   }
 };
 
-export const showMessage = async (
-  req: any,
-  res: any,
-  next: any,
-) => {
+export const showMessage = async (req: any, res: any, next: any) => {
   try {
     const { id: senderId } = req.params;
     const { user: currUser } = req;
@@ -60,7 +63,10 @@ export const showMessage = async (
     const messagesData = await MsgById(currUser, senderId);
     const { msg, otherUser } = messagesData;
     return res.render('dashboard', {
-      msg, data: users, user: currUser, otherUser,
+      msg,
+      data: users,
+      user: currUser,
+      otherUser,
     });
   } catch (err: any) {
     return next(new ApiError(400, err.message));

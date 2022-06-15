@@ -21,7 +21,7 @@ const label1 = document.getElementById('label1');
 socket.on('chat message', (data) => {
   const { message, receiverId, senderId } = data;
   if (receiverIdOnPage === senderId && senderIdOnPage === receiverId) {
-    socket.emit('undateMsgRead',{message});
+    socket.emit('undateMsgRead', message);
     const appendHtml = `<div class ="vW7d1"><span></span>
 <div class="_3_7SH _3DFk6 message-in tail"><span class="tail-container"></span><span
     class="tail-container highlight"></span>
@@ -60,7 +60,8 @@ input.addEventListener('keypress', (event) => {
     fetch(`http://127.0.0.1:8080/user?search=${search}`)
       .then((data) => data.json())
       .then((datafound) => {
-        const crossBtn = '<button class="close" onclick = "getFriends()"></button>';
+        const crossBtn =
+          '<button class="close" onclick = "getFriends()"></button>';
         label1.innerHTML = crossBtn;
         let htmlForUsers = '';
         if (datafound.data.length === 0) {
@@ -224,14 +225,12 @@ function seeRequest(divData) {
 function acceptRequest(Request) {
   fetch(`http://127.0.0.1:8080/friend/accept/${Request.id}`)
     .then((data) => data.json())
-    .then((datafound) => {
-    });
+    .then((datafound) => {});
 }
 function rejectRequest(data) {
   fetch(`http://127.0.0.1:8080/friend/reject/${data.id}`)
     .then((data) => data.json())
-    .then((datafound) => {
-    });
+    .then((datafound) => {});
 }
 /// ///////////////colour img ////////////////////
 function generateAvatar(text, foregroundColor, backgroundColor) {
@@ -259,7 +258,7 @@ for (let i = 0; i < users.length; i += 1) {
   users[i].src = generateAvatar(
     users[i].id[0].toUpperCase(),
     'white',
-    '#1bc2a2',
+    '#1bc2a2'
   );
 }
 /// ///////////send request///////////////////////
@@ -291,7 +290,8 @@ function getFriends(btndata) {
   fetch('http://127.0.0.1:8080/friend/friendList')
     .then((data) => data.json())
     .then((datafound) => {
-      const crossBtn = '<button class="close" onclick = "getFriends()"></button>';
+      const crossBtn =
+        '<button class="close" onclick = "getFriends()"></button>';
       label1.innerHTML = '';
       let htmlForUsers = '';
       datafound.data.forEach((element) => {
@@ -340,23 +340,26 @@ function getFriends(btndata) {
     });
 }
 let number = 0;
-socket.on('sent message',(data)=>{
-  const { message,receiverId, senderId } = data;
-  if(senderIdOnPage === receiverId){
-    const friend = document.getElementById(`${senderId}_friend_list`)
-    if(receiverIdOnPage === senderId){
-      friend.innerHTML =`${message.message}<svg id="Layer_1"
+socket.on('sent message', (data) => {
+  const { message, receiverId, senderId } = data;
+  if (senderIdOnPage === receiverId) {
+    const friend = document.getElementById(`${senderId}_friend_list`);
+    if (receiverIdOnPage === senderId) {
+      friend.innerHTML = `${message.message}<svg id="Layer_1"
       xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="18" height="18">
       <path fill="#4FC3F7"
         d="M17.394 5.035l-.57-.444a.434.434 0 0 0-.609.076l-6.39 8.198a.38.38 0 0 1-.577.039l-.427-.388a.381.381 0 0 0-.578.038l-.451.576a.497.497 0 0 0 .043.645l1.575 1.51a.38.38 0 0 0 .577-.039l7.483-9.602a.436.436 0 0 0-.076-.609zm-4.892 0l-.57-.444a.434.434 0 0 0-.609.076l-6.39 8.198a.38.38 0 0 1-.577.039l-2.614-2.556a.435.435 0 0 0-.614.007l-.505.516a.435.435 0 0 0 .007.614l3.887 3.8a.38.38 0 0 0 .577-.039l7.483-9.602a.435.435 0 0 0-.075-.609z">
       </path>
-    </svg></span></div>`
-    } else{
-      if(friend.getElementsByClassName('icon-button__badge')[0]){
-        let newNumber = friend.getElementsByClassName('icon-button__badge')[0].textContent
-        number +=(1+newNumber)
+    </svg></span></div>`;
+    } else {
+      if (friend.getElementsByClassName('icon-button__badge')[0]) {
+        const newNumber =
+          friend.getElementsByClassName('icon-button__badge')[0].textContent;
+        console.log(newNumber, number);
+        number = parseInt(newNumber, 2);
       }
-      number += 1
-   friend.innerHTML =`${ message.message}<span class="icon-button__badge unread-msg" >${number}</span>`
-  }}
-})
+      number += 1;
+      friend.innerHTML = `${message.message}<span class="icon-button__badge unread-msg" >${number}</span>`;
+    }
+  }
+});
