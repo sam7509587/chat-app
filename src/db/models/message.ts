@@ -1,11 +1,12 @@
 /* eslint-disable max-len */
 /* eslint-disable no-unused-vars */
 /* eslint-disable import/no-import-module-exports */
-import {
-  Model,
-} from 'sequelize';
+import { Model } from 'sequelize';
 
-module.exports = (sequelize: any, DataTypes: { UUID: any; STRING: any; BOOLEAN: any; }) => {
+module.exports = (
+  sequelize: any,
+  DataTypes: { UUID: any; STRING: any; BOOLEAN: any },
+) => {
   class message extends Model {
     /**
      * Helper method for defining associations.
@@ -23,16 +24,19 @@ module.exports = (sequelize: any, DataTypes: { UUID: any; STRING: any; BOOLEAN: 
       });
     }
   }
-  message.init({
-    to: DataTypes.UUID,
-    from: DataTypes.UUID,
-    message: DataTypes.STRING,
-    conversationId: DataTypes.UUID,
-    isActive: DataTypes.BOOLEAN,
-    isRead: { type: DataTypes.BOOLEAN, defaultValue: false },
-  }, {
-    sequelize,
-    modelName: 'message',
-  });
+  message.init(
+    {
+      to: DataTypes.UUID,
+      from: DataTypes.UUID,
+      message: DataTypes.STRING,
+      conversationId: DataTypes.UUID,
+      isActive: DataTypes.BOOLEAN,
+      isRead: { type: DataTypes.BOOLEAN, defaultValue: false },
+    },
+    {
+      sequelize,
+      modelName: 'message',
+    },
+  );
   return message;
 };

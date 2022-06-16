@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import express from 'express';
 import { showMessage, sendMessage } from '../controller/message';
 import { verifyToken } from '../middleware';

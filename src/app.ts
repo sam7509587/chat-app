@@ -13,6 +13,8 @@ app.use(express.static(path.join(__dirname, './views')));
 app.set('views', path.join(__dirname, './views/pages'));
 
 app.use('/', routes);
+require('./config/passport');
+
 app.use(errorHandler);
 
 export default app;

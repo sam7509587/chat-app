@@ -10,7 +10,7 @@ import { sendOtpMail } from '../services/mail';
 
 const { user, conversation } = require('../db/models');
 
-export const indexPage = async (req:any, res:any) => {
+export const indexPage = async (req: any, res: any) => {
   let token;
   if (req.headers.cookie) {
     token = req.headers.cookie.split('=')[1];
@@ -18,22 +18,23 @@ export const indexPage = async (req:any, res:any) => {
   if (!token) {
     return res.render('index', { err: 'you are not logged in' });
   }
-  const verifyToken:any = await jwt.verify(
-    token,
-    SECRET_KEY,
-  );
+  const verifyToken: any = await jwt.verify(token, SECRET_KEY);
   const userFound = await user.findOne({ where: { id: verifyToken.id } });
   const data = await getFriends(userFound);
-  const msg :any = [];
-  const otherUser:any = {};
+  const msg: any = [];
+  const otherUser: any = {};
   otherUser.id = 'none';
   const allotherUsers = await notFriends(userFound);
   return res.render('dashboard', {
-    data, msg, otherUser, allotherUsers, user: userFound,
+    data,
+    msg,
+    otherUser,
+    allotherUsers,
+    user: userFound,
   });
 };
 export const login = async (req: any, res: any) => {
-  const { email, password }:{email:string, password:string} = req.body;
+  const { email, password }: { email: string; password: string } = req.body;
   try {
     const userFound = await user.findOne({ where: { email } });
     if (!userFound) {
@@ -49,7 +50,8 @@ export const login = async (req: any, res: any) => {
       });
       sendOtpMail(email, otp);
       return res.render('otp', {
-        err: '', email,
+        err: '',
+        email,
       });
     }
     const matchPass = await bcrypt.compare(password, userFound.password);
@@ -82,15 +84,21 @@ export const login = async (req: any, res: any) => {
     }
     const token = await jwt.sign({ id: userFound.id }, SECRET_KEY);
     const data = await getFriends(userFound);
-    const msg :any = [];
-    const otherUser:any = {};
+    const msg: any = [];
+    const otherUser: any = {};
     otherUser.id = 'none';
     const allotherUsers = await notFriends(userFound);
-    return res.cookie('access_token', token, {
-      httpOnly: true,
-    }).render('dashboard', {
-      data, msg, otherUser, allotherUsers, user: userFound,
-    });
+    return res
+      .cookie('access_token', token, {
+        httpOnly: true,
+      })
+      .render('dashboard', {
+        data,
+        msg,
+        otherUser,
+        allotherUsers,
+        user: userFound,
+      });
   } catch (err: any) {
     return res.render('index', { err: err.message });
   }
@@ -105,16 +113,18 @@ export const allUser = async (req: any, res: any, next: any) => {
     });
     let blockedIds;
     if (findBockedUsers) {
-      const blockedUser = findBockedUsers.map((ids: { sender: any; receiver: any; }) => {
-        const a: any = [];
-        if (ids.sender === id) {
-          a.push(ids.receiver);
-        }
-        if (ids.receiver === id) {
-          a.push(ids.sender);
-        }
-        return a;
-      });
+      const blockedUser = findBockedUsers.map(
+        (ids: { sender: any; receiver: any }) => {
+          const a: any = [];
+          if (ids.sender === id) {
+            a.push(ids.receiver);
+          }
+          if (ids.receiver === id) {
+            a.push(ids.sender);
+          }
+          return a;
+        },
+      );
       blockedIds = blockedUser.flat(1);
       blockedIds.push(id);
     } else {
@@ -139,11 +149,15 @@ export const allUser = async (req: any, res: any, next: any) => {
     return next(new ApiError(400, e.message));
   }
 };
-export const verfiyOtp = async (req:any, res:any) => {
+export const verfiyOtp = async (req: any, res: any) => {
   try {
     const { email, otp }: any = req.body;
     if (!email || !otp) {
-      return res.render('otp', { otp: '', email, err: 'email and otp are required' });
+      return res.render('otp', {
+        otp: '',
+        email,
+        err: 'email and otp are required',
+      });
     }
     const foundData = await user.findOne({ where: { email } });
     if (!foundData) {
@@ -174,13 +188,13 @@ export const verfiyOtp = async (req:any, res:any) => {
     }
     await user.update({ isVerified: true }, { where: { email } });
     return res.render('profile', { email, err: '' });
-  } catch (err:any) {
+  } catch (err: any) {
     return res.render('otp', {
       err: err.message,
     });
   }
 };
-export const addFullName = async (req:any, res:any) => {
+export const addFullName = async (req: any, res: any) => {
   const { fullName, email } = req.body;
   if (!fullName) {
     return res.render('profile', { email, err: 'Full Name is required' });
@@ -192,15 +206,21 @@ export const addFullName = async (req:any, res:any) => {
   }
   const token = await jwt.sign({ id: userFound.id }, SECRET_KEY);
   const data = await getFriends(userFound);
-  const msg :any = [];
-  const otherUser:any = {};
+  const msg: any = [];
+  const otherUser: any = {};
   otherUser.id = 'none';
   const allotherUsers = await notFriends(userFound);
-  return res.cookie('access_token', token, {
-    httpOnly: true,
-  }).render('dashboard', {
-    data, msg, otherUser, allotherUsers, user: userFound,
-  });
+  return res
+    .cookie('access_token', token, {
+      httpOnly: true,
+    })
+    .render('dashboard', {
+      data,
+      msg,
+      otherUser,
+      allotherUsers,
+      user: userFound,
+    });
 };
 
-export const logout = async (_:any, res:any) => res.clearCookie('access_token').render('index', { err: '' });
+export const logout = async (_: any, res: any) => res.clearCookie('access_token').render('index', { err: '' });

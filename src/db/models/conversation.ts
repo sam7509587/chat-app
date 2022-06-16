@@ -1,11 +1,12 @@
 /* eslint-disable max-len */
 /* eslint-disable no-unused-vars */
 /* eslint-disable import/no-import-module-exports */
-import {
-  Model,
-} from 'sequelize';
+import { Model } from 'sequelize';
 
-module.exports = (sequelize: any, DataTypes: { UUID: any; ENUM: any ; BOOLEAN: any; STRING:any;}) => {
+module.exports = (
+  sequelize: any,
+  DataTypes: { UUID: any; ENUM: any; BOOLEAN: any; STRING: any },
+) => {
   class conversation extends Model {
     /**
      * Helper method for defining associations.
@@ -23,24 +24,27 @@ module.exports = (sequelize: any, DataTypes: { UUID: any; ENUM: any ; BOOLEAN: a
       });
     }
   }
-  conversation.init({
-    sender: DataTypes.UUID,
-    receiver: DataTypes.UUID,
-    status: {
-      type: DataTypes.ENUM(
-        'accepted',
-        'pending',
-        'rejected',
-        'blocked',
-        'unblocked',
-        'unfriend',
-      ),
-      defaultValue: 'pending',
+  conversation.init(
+    {
+      sender: DataTypes.UUID,
+      receiver: DataTypes.UUID,
+      status: {
+        type: DataTypes.ENUM(
+          'accepted',
+          'pending',
+          'rejected',
+          'blocked',
+          'unblocked',
+          'unfriend',
+        ),
+        defaultValue: 'pending',
+      },
+      isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
     },
-    isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
-  }, {
-    sequelize,
-    modelName: 'conversation',
-  });
+    {
+      sequelize,
+      modelName: 'conversation',
+    },
+  );
   return conversation;
 };

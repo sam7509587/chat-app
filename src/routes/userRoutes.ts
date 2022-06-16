@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import express from 'express';
 import {
   allUser, login, verfiyOtp, addFullName, logout,
@@ -8,9 +7,7 @@ import { userValidition } from '../validation';
 
 const router = express.Router();
 
-router.route('/')
-  .post(userValidition, login)
-  .get(verifyToken, allUser);
+router.route('/').post(userValidition, login).get(verifyToken, allUser);
 router.post('/verify', verfiyOtp);
 router.post('/profile', addFullName);
 router.get('/logout', verifyToken, logout);

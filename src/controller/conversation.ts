@@ -8,7 +8,7 @@ const { conversation, user } = require('../db/models');
 
 const { Op } = Sequelize;
 
-export const sendRequest = async (req:any, res:any, next:any) => {
+export const sendRequest = async (req: any, res: any, next: any) => {
   try {
     const { id: receiverId } = req.params;
     const senderId = req.user.id;
@@ -33,7 +33,9 @@ export const sendRequest = async (req:any, res:any, next:any) => {
       sender: senderId,
       receiver: receiverId,
     });
-    req.app.get('io').emit('send request', { receiver: receiverId, sender: senderId });
+    req.app
+      .get('io')
+      .emit('send request', { receiver: receiverId, sender: senderId });
     return res.status(200).json({
       statusCode: 200,
       message: 'request sent',
@@ -43,11 +45,7 @@ export const sendRequest = async (req:any, res:any, next:any) => {
     return next(new ApiError(400, err.message));
   }
 };
-export const seeRequests = async (
-  req: any,
-  res: any,
-  next: any,
-) => {
+export const seeRequests = async (req: any, res: any, next: any) => {
   try {
     const { search = '' } = req.query;
     const { id } = req.user;
@@ -72,11 +70,7 @@ export const seeRequests = async (
     return next(new ApiError(400, err.message));
   }
 };
-export const rejectRequest = async (
-  req: any,
-  res: any,
-  next: any,
-) => {
+export const rejectRequest = async (req: any, res: any, next: any) => {
   try {
     const { id } = req.params;
     await conversation.destroy({
@@ -93,11 +87,7 @@ export const rejectRequest = async (
     return next(new ApiError(400, err.message));
   }
 };
-export const acceptRequest = async (
-  req: any,
-  res: any,
-  next: any,
-) => {
+export const acceptRequest = async (req: any, res: any, next: any) => {
   try {
     const { id } = req.params;
     await conversation.update(
@@ -112,7 +102,7 @@ export const acceptRequest = async (
     return next(new ApiError(400, err.message));
   }
 };
-export const seeFriend = async (req:any, res:any) => {
+export const seeFriend = async (req: any, res: any) => {
   try {
     const friends = await getFriends(req.user);
     return res.json({ data: friends });

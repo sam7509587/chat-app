@@ -1,11 +1,12 @@
 /* eslint-disable max-len */
 /* eslint-disable no-unused-vars */
 /* eslint-disable import/no-import-module-exports */
-import {
-  Model,
-} from 'sequelize';
+import { Model } from 'sequelize';
 
-module.exports = (sequelize: any, DataTypes: { STRING: any; INTEGER: any; BOOLEAN: any; DATE:any }) => {
+module.exports = (
+  sequelize: any,
+  DataTypes: { STRING: any; INTEGER: any; BOOLEAN: any; DATE: any },
+) => {
   class user extends Model {
     /**
      * Helper method for defining associations.
@@ -31,17 +32,20 @@ module.exports = (sequelize: any, DataTypes: { STRING: any; INTEGER: any; BOOLEA
       });
     }
   }
-  user.init({
-    fullName: DataTypes.STRING,
-    password: DataTypes.STRING,
-    email: DataTypes.STRING,
-    isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
-    isVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
-    otp: { type: DataTypes.INTEGER },
-    otpExp: { type: DataTypes.DATE },
-  }, {
-    sequelize,
-    modelName: 'user',
-  });
+  user.init(
+    {
+      fullName: DataTypes.STRING,
+      password: DataTypes.STRING,
+      email: DataTypes.STRING,
+      isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
+      isVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
+      otp: { type: DataTypes.INTEGER },
+      otpExp: { type: DataTypes.DATE },
+    },
+    {
+      sequelize,
+      modelName: 'user',
+    },
+  );
   return user;
 };

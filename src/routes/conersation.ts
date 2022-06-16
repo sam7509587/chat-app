@@ -1,7 +1,10 @@
-/* eslint-disable import/no-unresolved */
 import express from 'express';
 import {
-  acceptRequest, rejectRequest, seeFriend, seeRequests, sendRequest,
+  acceptRequest,
+  rejectRequest,
+  seeFriend,
+  seeRequests,
+  sendRequest,
 } from '../controller';
 import { verifyToken } from '../middleware';
 import { validateId } from '../validation';

@@ -49,31 +49,31 @@ export const getFriends = async (userData: { id: any }) => {
   });
   /// ///last message
 
-  for (let i = 0; i < data.length; i + 1) {
-    const ids = [id, data[i].id];
-    await message
-      .findAll({
-        limit: 1,
-        where: {
-          to: { [Op.or]: ids },
-          from: { [Op.or]: ids },
-        },
-        order: [['createdAt', 'DESC']],
-      })
-      .then((result: any) => {
-        if (result[0]?.dataValues) {
-          data[i].dataValues.message = result[0]?.dataValues;
-          data[i].dataValues.message.msgSentOn = formatDate(
-            result[0].dataValues.createdAt,
-          );
-        }
-      });
-    await message
-      .count({ where: { to: id, from: data[i].id, isRead: false } })
-      .then((result: any) => {
-        data[i].dataValues.unReadCount = result;
-      });
-  }
+  // for (let i = 0; i < data.length; i + 1) {
+  //   const ids = [id, data[i].id];
+  //   await message
+  //     .findAll({
+  //       limit: 1,
+  //       where: {
+  //         to: { [Op.or]: ids },
+  //         from: { [Op.or]: ids },
+  //       },
+  //       order: [['createdAt', 'DESC']],
+  //     })
+  //     .then((result: any) => {
+  //       if (result[0]?.dataValues) {
+  //         data[i].dataValues.message = result[0]?.dataValues;
+  //         data[i].dataValues.message.msgSentOn = formatDate(
+  //           result[0].dataValues.createdAt,
+  //         );
+  //       }
+  //     });
+  //   await message
+  //     .count({ where: { to: id, from: data[i].id, isRead: false } })
+  //     .then((result: any) => {
+  //       data[i].dataValues.unReadCount = result;
+  //     });
+  // }
   return data;
 };
 /// /
